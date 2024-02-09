@@ -33,6 +33,7 @@ public class Server {
         
         // Register a shutdown hook to handle force stop or terminal close
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            
             System.out.println("Server is shutting down...");
 
             // Notify clients about the server shutdown
@@ -77,6 +78,7 @@ public class Server {
     private void stop() {
         try {
             if (!serverSocket.isClosed()) {
+                System.out.println("Terminated");
                 serverSocket.close();
             }
         } catch (IOException e) {

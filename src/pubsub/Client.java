@@ -35,7 +35,7 @@ public class Client {
         this.username = username;
     }
     
-    private void listenAndSendMessages(){
+    private void sendAndReceiveMessages(){
         Scanner input = new Scanner(System.in);
         String message;
         System.out.println("Enter a message to send to the server (or 'terminate' to quit): ");
@@ -43,34 +43,32 @@ public class Client {
             while (!socket.isClosed()) {
                 try { 
                     System.out.print(username+">>");
-                    if (input.hasNextLine()) {
-                        // Get user input and send it to the server
-                        message = input.nextLine();
-                    
-                        if (message.equalsIgnoreCase("terminate")) {
-                            writeMessage("terminate");
-                            socket.close();
-                            break;
-                        }
-
-                        if(message.isEmpty()){
-                            continue;
-                        }
-                        
-                        writeMessage(username + ": " + message);
+                    // Get user input and send it to the server
+                    message = input.nextLine();
+                
+                    if (message.equalsIgnoreCase("terminate")) {
+                        writeMessage("terminate");
+                        socket.close();
+                        break;
                     }
+
+                    if(message.isEmpty()){
+                        continue;
+                    }
+                    
+                    writeMessage(username + ": " + message);
 
                     // Receive and print the response from the server
                     System.out.println(reader.readLine());
                 }
                 catch (IOException e) {
-                    System.out.println(reader.readLine());
+                    Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, e);
                     break;
                 }   
             }
         } 
-        catch (IOException e) {
-            e.printStackTrace();
+        catch (Exception e) {
+            System.out.println("Force terminate");
         }
         finally {
             input.close();
@@ -81,10 +79,11 @@ public class Client {
     private void stop() {
         try {
             if (!socket.isClosed()) {
+                System.out.println("Terminated");
                 socket.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, e);
         }
     }
     
@@ -122,7 +121,7 @@ public class Client {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));    
             
             Client client = new Client(socket, reader, writer, username);
-            client.listenAndSendMessages();
+            client.sendAndReceiveMessages();
             
             // Register a shutdown hook to handle force stop or terminal close
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
